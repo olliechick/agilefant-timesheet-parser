@@ -25,6 +25,7 @@ a: use alphabetical order
 d[int]: use [int] decimal places
 f: use first names [Note that this will use the first name as a key, so multiple users with the same first name will be listed as one entry]
 h: print this help text
+n: include each user's ranking (a number; 1 -> n)
 r: print in reverse sorted order
 """
 
@@ -36,8 +37,10 @@ Prints the number of hours each user has done.
         "alpha": alphabetical by first name
         "hours": by number of hours (least to most) (default)
 @param number_of_decimal_places how specific the hour count for each person should be
+@param reverse_order if True, reverses order of list
+@param rank if True, adds a ranking to each item in the list (1 -> n)
 """
-def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_decimal_places = 1, reverse_order = False):
+def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_decimal_places = 1, reverse_order = False, rank = True):
     num_cols = xl_sheet.ncols   # Number of columns
     users = dict()
     
@@ -68,6 +71,7 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     
     max_length = max([len(user) for user in users])
     output_format = '{0:>%d}: {1:.%df}' % (max_length, number_of_decimal_places)
+    rank_format = '{0:>%d}: ' % (len(str(len(users))))
     
     # Print it
     
@@ -80,7 +84,11 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     if reverse_order:
         user_list.reverse()
         
+    i = 0
     for user in user_list:
+        i += 1
+        if (rank):
+            print(rank_format.format(i), end = '')
         print(output_format.format(user, users[user])) 
     
 
@@ -92,6 +100,7 @@ def main(args):
     number_of_decimal_places = 1
     use_first_name = False
     reverse_order = False
+    rank = False
     
     if 'h' in args:
         print(HELPTEXT)
@@ -110,10 +119,13 @@ def main(args):
                 if arg == 'f':
                     use_first_name = True
                     
+                if arg == 'n':
+                    rank = True
+                    
                 if arg == 'r':
                     reverse_order = True
                 
-        print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places, reverse_order)        
+        print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places, reverse_order, rank)        
             
             
 if __name__ == "__main__":
