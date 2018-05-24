@@ -14,12 +14,18 @@ def get_first_sheet(filename):
     # Return first sheet
     return xl_workbook.sheet_by_index(0)
 
-HELPTEXT = """Possible args:
+HELPTEXT = """
+Prints a list of users and how many hours they have logged.
+This is sorted by the number of hours logged, from least to most.
+By default, 1 decimal place is used (e.g. 12.5).
+
+Possible args:
 
 a: use alphabetical order
 d[int]: use [int] decimal places
-f: use first names
+f: use first names [Note that this will use the first name as a key, so multiple users with the same first name will be listed as one entry]
 h: print this help text
+r: print in reverse sorted order
 """
 
 
