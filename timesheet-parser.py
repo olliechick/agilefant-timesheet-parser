@@ -66,12 +66,16 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     # Print it
     
     if (sorting == "alpha"):
-        for user in sorted(users.keys()):
-            print(output_format.format(user, users[user])) 
+        user_list = sorted(users.keys())
         
     else: ## if (sorting == "hours"):
-        for user in sorted(users, key=users.get):
-            print(output_format.format(user, users[user])) 
+        user_list = sorted(users, key=users.get)
+        
+    if reverse_order:
+        user_list.reverse()
+        
+    for user in user_list:
+        print(output_format.format(user, users[user])) 
     
 
 def main(args):
