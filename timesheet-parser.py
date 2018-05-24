@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import print_function
 from os.path import join, dirname, abspath
@@ -19,6 +19,7 @@ HELPTEXT = """Possible args:
 a: use alphabetical order
 d[int]: use [int] decimal places
 f: use first names
+h: print this help text
 """
 
 
@@ -65,12 +66,12 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     # Print it
     
     if (sorting == "alpha"):
-        for key, value in sorted(users.items(), key=lambda (k,v): (k,v)):
-            print(output_format.format(key, value))   
+        for user in sorted(users.keys()):
+            print(output_format.format(user, users[user])) 
         
-    else:## if (sorting == "hours"):
-        for key, value in sorted(users.items(), key=lambda (k,v): (v,k)):
-            print(output_format.format(key, value))   
+    else: ## if (sorting == "hours"):
+        for user in sorted(users, key=users.get):
+            print(output_format.format(user, users[user])) 
     
 
 def main(args):
@@ -86,21 +87,22 @@ def main(args):
         print(HELPTEXT)
         
     else:
-        for arg in args:
-            if arg == 'a':
-                sorting = "alpha"
-                
-            if arg[0] == 'd':
-                decimal_places_str = arg[1:]
-                if (decimal_places_str.isdigit()):
-                    number_of_decimal_places = int(decimal_places_str)
+        if len(args) > 1:
+            for arg in args:
+                if arg == 'a':
+                    sorting = "alpha"
                     
-            if arg == 'f':
-                use_first_name = True
+                if arg[0] == 'd':
+                    decimal_places_str = arg[1:]
+                    if (decimal_places_str.isdigit()):
+                        number_of_decimal_places = int(decimal_places_str)
+                        
+                if arg == 'f':
+                    use_first_name = True
+                    
+                if arg == 'r':
+                    reverse_order = True
                 
-            if arg == 'r':
-                reverse_order = True
-            
         print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places, reverse_order)        
             
             
