@@ -57,7 +57,7 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
             cell_value = xl_sheet.cell(row_i, col_i).value
             
             if col_i == 3:
-                col_4 = cell_value.strip()
+                col_3 = cell_value.strip()
             
             if col_i == 5 and display_tag_errors: # Comment, e.g. "Merge review of s46 #chore"
                 words = re.split(" |\.", cell_value)
@@ -65,15 +65,21 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
                 for word in words:
                     if len(word) > 0 and word[0] == "#":
                         tags.add(word[1:])
-                if not (valid_tags.intersection(tags) or col_4 == ''):
+                if not (valid_tags.intersection(tags) or col_3 == ''):
                     # No valid tags, and not a task without story
-                    print("No valid tags: " + cell_value)
+                    tag_error = True
+                    col_5 = cell_value
+                else:
+                    tag_error = False
                         
             if col_i == 6: # User name
                 if (use_first_name):
                     user = cell_value.split(" ")[0] #Note: this means people with the same first name are grouped together
                 else:
                     user = cell_value
+                    
+                if display_tag_errors and tag_error:
+                    print(user + ": " + col_5)
                     
                 if user not in users:
                     ##print("Adding " + str(user))
