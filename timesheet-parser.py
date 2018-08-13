@@ -5,6 +5,11 @@ from os.path import join, dirname, abspath
 import xlrd
 from xlrd.sheet import ctype_text  
 import sys
+import re
+
+valid_tags = {"implement", "document", "test", "testmanual", "fix", "chore", "refactor"}
+
+exceptions = {'Sprint planning 1', 'Standup 1', 'Standup 2', 'Standup 3', 'SP2 I', 'SP2 II', 'MediaSuite lecture', "Dion's Atlassian lecture"}
 
 def get_first_sheet(filename):
     
@@ -40,7 +45,7 @@ Prints the number of hours each user has done.
 @param reverse_order if True, reverses order of list
 @param rank if True, adds a ranking to each item in the list (1 -> n)
 """
-def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_decimal_places = 1, reverse_order = False, rank = True):
+def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_decimal_places = 1, reverse_order = False, rank = True, display_tag_errors = False):
     num_cols = xl_sheet.ncols   # Number of columns
     users = dict()
     
@@ -53,7 +58,15 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
             # Get cell value by row, col
             cell_value = xl_sheet.cell(row_i, col_i).value
             
-            
+            if col_i == 5 and display_tag_errors: # Comment, e.g. "Merge review of s46 #chore"
+                words = re.split(" |\.", cell_value)
+                tags = set()
+                for word in words:
+                    if len(word) > 0 and word[0] == "#":
+                        tags.add(word[1:])
+                if not (valid_tags.intersection(tags) or cell_value in exceptions):
+                    print("No valid tags: " + cell_value)
+                        
             if col_i == 6: # User name
                 if (use_first_name):
                     user = cell_value.split(" ")[0] #Note: this means people with the same first name are grouped together
@@ -101,6 +114,7 @@ def main(args):
     use_first_name = False
     reverse_order = False
     rank = False
+    display_tag_errors = False
     
     if 'h' in args:
         print(HELPTEXT)
@@ -124,8 +138,11 @@ def main(args):
                     
                 if arg == 'r':
                     reverse_order = True
+                    
+                if arg == 't':
+                    display_tag_errors = True
                 
-        print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places, reverse_order, rank)        
+        print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places, reverse_order, rank, display_tag_errors)        
             
             
 if __name__ == "__main__":
