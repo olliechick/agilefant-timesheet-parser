@@ -9,8 +9,6 @@ import re
 
 valid_tags = {"implement", "document", "test", "testmanual", "fix", "chore", "refactor"}
 
-exceptions = {'Sprint planning 1', 'Standup 1', 'Standup 2', 'Standup 3', 'SP2 I', 'SP2 II', 'MediaSuite lecture', "Dion's Atlassian lecture"}
-
 def get_first_sheet(filename):
     
     # Open the workbook
@@ -58,13 +56,17 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
             # Get cell value by row, col
             cell_value = xl_sheet.cell(row_i, col_i).value
             
+            if col_i == 3:
+                col_4 = cell_value.strip()
+            
             if col_i == 5 and display_tag_errors: # Comment, e.g. "Merge review of s46 #chore"
                 words = re.split(" |\.", cell_value)
                 tags = set()
                 for word in words:
                     if len(word) > 0 and word[0] == "#":
                         tags.add(word[1:])
-                if not (valid_tags.intersection(tags) or cell_value in exceptions):
+                if not (valid_tags.intersection(tags) or col_4 == ''):
+                    # No valid tags, and not a task without story
                     print("No valid tags: " + cell_value)
                         
             if col_i == 6: # User name
