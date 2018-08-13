@@ -8,6 +8,7 @@ import sys
 import re
 
 valid_tags = {"implement", "document", "test", "testmanual", "fix", "chore", "refactor"}
+commitless_tags = {'commits', 'chore', 'document'}
 
 def get_first_sheet(filename):
     
@@ -25,13 +26,13 @@ By default, 1 decimal place is used (e.g. 12.5).
 Possible args:
 
 a: use alphabetical order
-d[int]: use [int] decimal places
+d[int]: use [int] decimal places (e.g. d3)
 f: use first names [Note that this will use the first name as a key, so multiple users with the same first name will be listed as one entry]
 h: print this help text
 n: include each user's ranking (a number; 1 -> n)
 r: print in reverse sorted order
+t: print all invalid log comments
 """
-
 
 """
 Prints the number of hours each user has done.
@@ -51,42 +52,36 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     
     # For each row (except header row):
     for row_i in range(1, xl_sheet.nrows):
-        # For each column:
-        for col_i in range(0, num_cols):  # Iterate through columns
-            # Get cell value by row, col
-            cell_value = xl_sheet.cell(row_i, col_i).value
+        product = xl_sheet.cell(row_i, 0).value.strip()
+        project = xl_sheet.cell(row_i, 1).value.strip()
+        iteration = xl_sheet.cell(row_i, 2).value.strip()
+        story = xl_sheet.cell(row_i, 3).value.strip() 
+        task = xl_sheet.cell(row_i, 4).value.strip() 
+        comment = xl_sheet.cell(row_i, 5).value.strip() 
+        user = xl_sheet.cell(row_i, 6).value.strip() 
+        date = xl_sheet.cell(row_i, 7).value
+        spent_effort = xl_sheet.cell(row_i, 8).value
+
+        if (use_first_name):
+            user = user.split(" ")[0] #Note: this means people with the same first name are grouped together
+        else:
+            user = user
             
-            if col_i == 3:
-                col_3 = cell_value.strip()
+        if user not in users:
+            ##print("Adding " + str(user))
+            users[user] = 0   
             
-            if col_i == 5 and display_tag_errors: # Comment, e.g. "Merge review of s46 #chore"
-                words = re.split(" |\.", cell_value)
-                tags = set()
-                for word in words:
-                    if len(word) > 0 and word[0] == "#":
-                        tags.add(word[1:])
-                if not (valid_tags.intersection(tags) or col_3 == ''):
-                    # No valid tags, and not a task without story
-                    tag_error = True
-                    col_5 = cell_value
-                else:
-                    tag_error = False
-                        
-            if col_i == 6: # User name
-                if (use_first_name):
-                    user = cell_value.split(" ")[0] #Note: this means people with the same first name are grouped together
-                else:
-                    user = cell_value
-                    
-                if display_tag_errors and tag_error:
-                    print(user + ": " + col_5)
-                    
-                if user not in users:
-                    ##print("Adding " + str(user))
-                    users[user] = 0
-                    
-            elif col_i == 8: # Hours
-                users[user] += float(cell_value)
+        users[user] += float(spent_effort)        
+            
+        if display_tag_errors:
+            words = re.split(" |\.|:|\[", comment)
+            tags = set()
+            for word in words:
+                if len(word) > 0 and word[0] == "#":
+                    tags.add(word[1:].lower())
+            if story != '' and not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
+                # No valid tags, and not a task without story
+                print(user + ": " + comment)
                 
     # Create a nice format
     
