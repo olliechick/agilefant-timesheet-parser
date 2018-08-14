@@ -82,6 +82,34 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
             if story != '' and not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
                 # No valid tags, and not a task without story
                 print(user + ": " + comment)
+            
+            words = re.split(" |\.|:", comment)
+            commits = ""
+            in_commit = False
+            commits = ''
+            for word in words:
+                if word[:8] == '#commits':
+                    in_commit = True
+                    commits = word[8:]
+                    
+                elif in_commit:
+                    commits += word
+                    
+                if in_commit:
+                    if len(word) != 0 and word[-1] == ']':
+                        in_commit = False
+                        commits = commits.strip()
+                        commits = commits.strip('[')
+                        commits = commits.strip(']')
+                        good = True
+                        for commit_hash in commits.split(','):
+                            if (len(commit_hash) not in [7, 8, 40]):
+                                good = False
+                        if not good:
+                            print(user + ': [warning: commit SHA len] ' + comment)
+                        commits = ''
+                    
+                    
                 
     # Create a nice format
     
@@ -90,6 +118,8 @@ def print_hours(xl_sheet, use_first_name = False, sorting = "hours", number_of_d
     rank_format = '{0:>%d}: ' % (len(str(len(users))))
     
     # Print it
+    
+    print()
     
     if (sorting == "alpha"):
         user_list = sorted(users.keys())
