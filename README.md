@@ -1,6 +1,10 @@
 # Agilefant timesheet parser
 A parser for timesheets exported by the free version of Agilefant. I developed this to use for SENG302 in 2018.
 
+# Pre-requisites
+
+Install python3 and xlrd.
+
 # Running the program
 
 Run the command python3 `timesheet-parser.py`.
