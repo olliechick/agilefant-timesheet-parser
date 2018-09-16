@@ -14,7 +14,12 @@ Argument |What it does
 `a`      |Sort users in alphabetical order (by first name)
 `d[int]` |Uses `int` decimal places (e.g. `d3`)
 `f`      |Use first names (note that this means two users with the same first name get grouped together)
-`h`      |Print help text (instead of running the main program)
-`n`      |Include each user's ranking (a number ;` -> n)
+`h`      |Prints the help text (instead of running the main program)
+`n`      |Include each user's ranking (a number; 1 -> n)
 `r`      |Print in reverse sorted order
 `t`      |Print all invalid log comments
+
+# What it does
+It prints a list of users and how many hours they have logged.
+This is sorted by the number of hours logged, from least to most.
+By default, 1 decimal place is used (e.g. `12.5`).
