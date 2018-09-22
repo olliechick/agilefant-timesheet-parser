@@ -21,7 +21,7 @@ Argument |What it does
 `h`      |Prints the help text (instead of running the main program)
 `n`      |Include each user's ranking (a number; 1 -> n)
 `r`      |Print in reverse sorted order
-`t`      |Print all invalid log comments
+`t`      |Print all invalid log comments (for University of Canterbury course SENG302)
 
 # What it does
 It prints a list of users and how many hours they have logged.
