@@ -23,7 +23,15 @@ Argument |What it does
 `r`      |Print in reverse sorted order
 `t`      |Print all invalid log comments (for University of Canterbury course SENG302)
 
-# What it does
+## What it does
 It prints a list of users and how many hours they have logged.
 
 By default, this is sorted by the number of hours logged, from least to most, and 1 decimal place is used (e.g. `12.5`).
+
+## Example output
+
+```
+          Ollie Chick: 50.6
+       Example person: 53.5
+Verylong-named person: 63.5
+```
