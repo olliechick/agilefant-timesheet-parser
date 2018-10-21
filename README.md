@@ -1,17 +1,17 @@
 # Agilefant timesheet parser
 A parser for timesheets exported by the free version of Agilefant. I developed this to use for SENG302 in 2018.
 
-# Pre-requisites
+## Pre-requisites
 
 Install python3 and xlrd.
 
-# Running the program
+## Running the program
 
 Run the command `./timesheet-parser.py`.
 
 It accepts command-line arguments, in the form `./timesheet-parser.py <command>`, e.g. `./timesheet-parser.py a b c`. My personal favourite is `./timesheet-parser.py r n`, which produces a ranked list of who has logged the most hours.
 
-## Available arguments
+### Available arguments
 
 Argument |What it does
 ---------|------------
@@ -28,9 +28,11 @@ It prints a list of users and how many hours they have logged.
 
 By default, this is sorted by the number of hours logged, from least to most, and 1 decimal place is used (e.g. `12.5`).
 
-## Example output
+### Example output
 
 ```
+ollie@ollie-computer:~/Documents/agilefant-timesheet-parser$ ./timesheet-parser.py 
+
           Ollie Chick: 50.6
        Example person: 53.5
 Verylong-named person: 63.5
