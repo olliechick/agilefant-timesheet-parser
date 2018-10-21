@@ -7,9 +7,9 @@ Install python3 and xlrd.
 
 # Running the program
 
-Run the command python3 `timesheet-parser.py`.
+Run the command `./timesheet-parser.py`.
 
-It accepts command-line arguments, in the form `timesheet-parser.py <command>`, e.g. `timesheet-parser.py a b c`.
+It accepts command-line arguments, in the form `./timesheet-parser.py <command>`, e.g. `./timesheet-parser.py a b c`. My personal favourite is `./timesheet-parser.py r n`, which produces a ranked list of who has logged the most hours.
 
 ## Available arguments
 
@@ -25,5 +25,5 @@ Argument |What it does
 
 # What it does
 It prints a list of users and how many hours they have logged.
-This is sorted by the number of hours logged, from least to most.
-By default, 1 decimal place is used (e.g. `12.5`).
+
+By default, this is sorted by the number of hours logged, from least to most, and 1 decimal place is used (e.g. `12.5`).
