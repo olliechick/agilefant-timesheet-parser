@@ -22,7 +22,7 @@ Argument |What it does
 `n`      |Include each user's ranking (a number; 1 -> n)
 `r`      |Print in reverse sorted order
 `t`      |Print all invalid log comments (for University of Canterbury course SENG302)
-`t`      |Print all log comments
+`ta`      |Print all log comments
 
 ## What it does
 It prints a list of users and how many hours they have logged.
