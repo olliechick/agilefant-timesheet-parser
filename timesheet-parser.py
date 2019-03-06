@@ -35,11 +35,12 @@ n: include each user's ranking (a number; 1 -> n)
 r: print in reverse sorted order
 t: print all invalid log comments
 ta: print all log comments
+2018: use the old column layout, defaults to new Agilefant version used in 2019
 """
 
 
 def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decimal_places=1,
-                reverse_order=False, rank=True, display_tag_errors=False, display_all_tags=False):
+                reverse_order=False, rank=True, display_tag_errors=False, display_all_tags=False, is_2019=True):
     """
     Prints the number of hours each user has done, and optionally other data
 
@@ -53,6 +54,7 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
     :param rank: if True, adds a ranking to each item in the list (1 -> n)
     :param display_tag_errors: if True, prints out each log that isn't tagged correctly
     :param display_all_tags: if True, prints out all logs
+    :param is_2019: if True, use new Agilefant column format
     """
     num_cols = xl_sheet.ncols  # Number of columns
     users = dict()
@@ -63,17 +65,30 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
 
     # For each row (except header row):
     for row_i in range(1, xl_sheet.nrows):
-        product = xl_sheet.cell(row_i, 0).value.strip()
-        project = xl_sheet.cell(row_i, 1).value.strip()
-        iteration = xl_sheet.cell(row_i, 2).value.strip()
-        story = xl_sheet.cell(row_i, 3).value.strip()
-        task = xl_sheet.cell(row_i, 4).value.strip()
-        comment = xl_sheet.cell(row_i, 5).value.strip()
-        user = xl_sheet.cell(row_i, 6).value.strip()
-        date = xl_sheet.cell(row_i, 7).value
-        spent_effort = xl_sheet.cell(row_i, 8).value
+        if is_2019:
+            product = xl_sheet.cell(row_i, 0).value.strip()
+            project = xl_sheet.cell(row_i, 1).value.strip()
+            iteration = xl_sheet.cell(row_i, 2).value.strip()
+            story_id = xl_sheet.cell(row_i, 3).value.strip()
+            story = xl_sheet.cell(row_i, 4).value.strip()
+            task_id = xl_sheet.cell(row_i, 5).value.strip()
+            task = xl_sheet.cell(row_i, 6).value.strip()
+            comment = xl_sheet.cell(row_i, 7).value.strip()
+            user = xl_sheet.cell(row_i, 8).value.strip()
+            date = xl_sheet.cell(row_i, 9).value
+            spent_effort = xl_sheet.cell(row_i, 10).value
+        else:
+            product = xl_sheet.cell(row_i, 0).value.strip()
+            project = xl_sheet.cell(row_i, 1).value.strip()
+            iteration = xl_sheet.cell(row_i, 2).value.strip()
+            story = xl_sheet.cell(row_i, 3).value.strip()
+            task = xl_sheet.cell(row_i, 4).value.strip()
+            comment = xl_sheet.cell(row_i, 5).value.strip()
+            user = xl_sheet.cell(row_i, 6).value.strip()
+            date = xl_sheet.cell(row_i, 7).value
+            spent_effort = xl_sheet.cell(row_i, 8).value
 
-        if (use_first_name):
+        if use_first_name:
             user = user.split(" ")[0]  # Note: this means people with the same first name are grouped together
         else:
             user = user
@@ -173,6 +188,7 @@ def main(args):
     rank = False
     display_tag_errors = False
     display_all_tags = False
+    is_2019 = True
 
     if 'h' in args:
         print(HELPTEXT)
@@ -203,8 +219,11 @@ def main(args):
                 if arg == 'ta':
                     display_all_tags = True
 
+                if arg == '2018':
+                    is_2019 = False
+
         print_hours(xl_sheet, use_first_name, sorting, number_of_decimal_places,
-                    reverse_order, rank, display_tag_errors, display_all_tags)
+                    reverse_order, rank, display_tag_errors, display_all_tags, is_2019)
 
 
 if __name__ == "__main__":
