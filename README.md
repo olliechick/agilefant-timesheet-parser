@@ -32,9 +32,15 @@ By default, this is sorted by the number of hours logged, from least to most, an
 ### Example output
 
 ```
-ollie@ollie-computer:~/Documents/agilefant-timesheet-parser$ ./timesheet-parser.py 
+$ ./timesheet-parser.py 
 
           Ollie Chick: 50.6
-       Example person: 53.5
-Verylong-named person: 63.5
+       Example person: 63.5
+Verylong-named person: 53.5
+
+$ ./timesheet-parser.py r n
+
+1:        Example person: 63.5
+2: Verylong-named person: 53.5
+3:           Ollie Chick: 50.6
 ```
