@@ -125,7 +125,8 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
     for row_i in range(1, xl_sheet.nrows):
         stripped_values = map(strip_if_string, xl_sheet.row_values(row_i))
         entry = dict(zip(headers, stripped_values))
-        result = process_entry(entry, time_per_user, processed_results, use_first_name, display_all_tags, display_tag_errors)
+        result = process_entry(entry, time_per_user, processed_results,
+                               use_first_name, display_all_tags, display_tag_errors)
         processed_results.add(result)
 
     max_length = max([len(user) for user in time_per_user])
@@ -151,6 +152,8 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
         if rank:
             print(rank_format.format(i), end='')
         print(output_format.format(user, time_per_user[user]))
+
+    print()
 
 
 def main(args):
