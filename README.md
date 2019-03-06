@@ -1,5 +1,5 @@
 # Agilefant timesheet parser
-A parser for timesheets exported by the free version of Agilefant. I developed this to use for SENG302 in 2018. It has since been updated (by [@jackodsteel](github.com/jackodsteel)) for SENG302 in 2019, as the format has changed slightly (one less column is generated).
+A parser for timesheets exported by the free version of Agilefant. I developed this to use for SENG302 in 2018. It has since been updated (by [@jackodsteel](https://github.com/jackodsteel)) for SENG302 in 2019, as the format has changed slightly (one less column is generated).
 
 ## Pre-requisites
 
