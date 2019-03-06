@@ -22,7 +22,7 @@ Argument |What it does
 `n`      |Include each user's ranking (a number; 1 -> n)
 `r`      |Print in reverse sorted order
 `t`      |Print all invalid log comments (for University of Canterbury course SENG302)
-`ta`      |Print all log comments
+`ta`     |Print all log comments
 
 ## What it does
 It prints a list of users and how many hours they have logged.
@@ -35,8 +35,8 @@ By default, this is sorted by the number of hours logged, from least to most, an
 $ ./timesheet-parser.py 
 
           Ollie Chick: 50.6
-       Example person: 63.5
-Verylong-named person: 53.5
+       Example person: 53.5
+Verylong-named person: 63.5
 
 $ ./timesheet-parser.py r n
 
