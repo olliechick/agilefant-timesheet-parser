@@ -43,8 +43,10 @@ def strip_if_string(x): return x.strip() if isinstance(x, str) else x
 
 
 def get_commit_hashes(string):
-    if '#commits' in string:
+    if '#commits[' in string:
         trimmed_string = string[string.find('#commits') + len('#commits['):]
+    elif '#commits [' in string:
+        trimmed_string = string[string.find('#commits') + len('#commits ['):]
     else:
         return []
     return map(str.strip, trimmed_string[: trimmed_string.find(']')].split(','))
@@ -72,8 +74,7 @@ def process_entry(entry, users, existing_comments, use_first_name, display_all_t
                 tags.add(word[1:].lower())
         if story != '':
             if not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
-                # No valid tags, and not a task without story
-                print(user + ": " + comment)
+                print(user + ": [No valid tags, and not a task without story] " + comment)
 
             else:
                 for old_user, old_comment in existing_comments:
