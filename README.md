@@ -7,7 +7,7 @@ Install python3 and xlrd.
 
 ## Running the program
 
-Save the exported timesheet in the root directory of this repo, then run the command `./timesheet-parser.py`.
+Save the exported timesheet (`agilefantTimesheet.xls`) in the root directory of this repo, then run the command `./timesheet-parser.py`.
 
 It accepts command-line arguments, in the form `./timesheet-parser.py <command>`, e.g. `./timesheet-parser.py a b c`. My personal favourite is `./timesheet-parser.py r n`, which produces a ranked list of who has logged the most hours.
 
