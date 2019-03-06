@@ -5,20 +5,13 @@ from __future__ import print_function
 import re
 import sys
 from os.path import join, dirname, abspath
+from collections import defaultdict
 
 import xlrd
 
 valid_tags = {"implement", "document", "test", "testmanual", "fix", "chore", "refactor"}
 commitless_tags = {'commits', 'chore', 'document', 'testmanual'}
-
-
-def get_first_sheet(filename):
-    # Open the workbook
-    xl_workbook = xlrd.open_workbook(filename)
-
-    # Return first sheet
-    return xl_workbook.sheet_by_index(0)
-
+required_columns = {"Story", "Comment", "User", "Spent effort (hours)"}
 
 HELPTEXT = """
 Prints a list of users and how many hours they have logged.
@@ -38,6 +31,67 @@ ta: print all log comments
 """
 
 
+def get_first_sheet(filename):
+    # Open the workbook
+    xl_workbook = xlrd.open_workbook(filename)
+
+    # Return first sheet
+    return xl_workbook.sheet_by_index(0)
+
+
+def strip_if_string(x): return x.strip() if isinstance(x, str) else x
+
+
+def get_commit_hashes(string):
+    if '#commits[' in string:
+        trimmed_string = string[string.find('#commits') + len('#commits['):]
+    elif '#commits [' in string:
+        trimmed_string = string[string.find('#commits') + len('#commits ['):]
+    else:
+        return []
+    return map(str.strip, trimmed_string[: trimmed_string.find(']')].split(','))
+
+
+def process_entry(entry, users, existing_comments, use_first_name, display_all_tags, display_tag_errors):
+    story = entry["Story"]
+    comment = entry["Comment"]
+    user = entry["User"]
+    spent_effort = entry["Spent effort (hours)"]
+
+    if use_first_name:
+        user = user.split(" ")[0]  # Note: this means people with the same first name are grouped together
+
+    users[user] += float(spent_effort)
+
+    if display_all_tags:
+        print(user + ": " + comment)
+
+    if display_tag_errors:
+        words = re.split(" |\.|:|\[", comment)
+        tags = set()
+        for word in words:
+            if len(word) > 0 and word[0] == "#":
+                tags.add(word[1:].lower())
+        if story != '':
+            if not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
+                print(user + ": [No valid tags, and not a task without story] " + comment)
+
+            else:
+                for old_user, old_comment in existing_comments:
+                    if old_comment == comment and 'pair' not in tags:
+                        if old_user == user:
+                            print(user + ': [warning: duplicate] ' + comment)
+                        else:
+                            print(user + ' & ' + old_user + ': [warning: untagged pair] ' + comment)
+
+        commit_hashes = get_commit_hashes(comment)
+        for commit_hash in commit_hashes:
+            if len(commit_hash) not in [7, 8, 40]:
+                print(user + ': [warning: commit SHA len] ' + comment)
+                break
+    return user, comment
+
+
 def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decimal_places=1,
                 reverse_order=False, rank=True, display_tag_errors=False, display_all_tags=False):
     """
@@ -54,102 +108,39 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
     :param display_tag_errors: if True, prints out each log that isn't tagged correctly
     :param display_all_tags: if True, prints out all logs
     """
-    num_cols = xl_sheet.ncols  # Number of columns
-    users = dict()
+    time_per_user = defaultdict(int)
 
     # Generate hours-worked data
 
-    existing_comments = set()
+    processed_results = set()
+
+    headers = xl_sheet.row_values(0)
+    if not set(headers).issuperset(required_columns):
+        print("The input file does not contain all the required columns, expected: ", required_columns)
+        print("Missing: ", required_columns.difference(headers))
+        print("Got: ", headers)
+        exit(1)
 
     # For each row (except header row):
     for row_i in range(1, xl_sheet.nrows):
-        product = xl_sheet.cell(row_i, 0).value.strip()
-        project = xl_sheet.cell(row_i, 1).value.strip()
-        iteration = xl_sheet.cell(row_i, 2).value.strip()
-        story = xl_sheet.cell(row_i, 3).value.strip()
-        task = xl_sheet.cell(row_i, 4).value.strip()
-        comment = xl_sheet.cell(row_i, 5).value.strip()
-        user = xl_sheet.cell(row_i, 6).value.strip()
-        date = xl_sheet.cell(row_i, 7).value
-        spent_effort = xl_sheet.cell(row_i, 8).value
+        stripped_values = map(strip_if_string, xl_sheet.row_values(row_i))
+        entry = dict(zip(headers, stripped_values))
+        result = process_entry(entry, time_per_user, processed_results, use_first_name, display_all_tags, display_tag_errors)
+        processed_results.add(result)
 
-        if (use_first_name):
-            user = user.split(" ")[0]  # Note: this means people with the same first name are grouped together
-        else:
-            user = user
-
-        if user not in users:
-            ##print("Adding " + str(user))
-            users[user] = 0
-
-        users[user] += float(spent_effort)
-
-        if display_all_tags:
-            print(user + ": " + comment)
-
-        if display_tag_errors:
-            words = re.split(" |\.|:|\[", comment)
-            tags = set()
-            for word in words:
-                if len(word) > 0 and word[0] == "#":
-                    tags.add(word[1:].lower())
-            if story != '':
-                if not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
-                    # No valid tags, and not a task without story
-                    print(user + ": " + comment)
-
-                else:
-                    for user_and_comment in existing_comments:
-                        old_user, old_comment = user_and_comment
-                        if old_comment == comment and 'pair' not in tags:
-                            if old_user == user:
-                                print(user + ': [warning: duplicate] ' + comment)
-                            else:
-                                print(user + ' & ' + old_user + ': [warning: untagged pair] ' + comment)
-
-            words = re.split(" |\.|:", comment)
-            commits = ""
-            in_commit = False
-            commits = ''
-            for word in words:
-                if word[:8] == '#commits':
-                    in_commit = True
-                    commits = word[8:]
-
-                elif in_commit:
-                    commits += word
-
-                if in_commit:
-                    if len(word) != 0 and word[-1] == ']':
-                        in_commit = False
-                        commits = commits.strip()
-                        commits = commits.strip('[')
-                        commits = commits.strip(']')
-                        good = True
-                        for commit_hash in commits.split(','):
-                            if (len(commit_hash) not in [7, 8, 40]):
-                                good = False
-                        if not good:
-                            print(user + ': [warning: commit SHA len] ' + comment)
-                        commits = ''
-
-        existing_comments.add((user, comment))
-
-        # Create a nice format
-
-    max_length = max([len(user) for user in users])
+    max_length = max([len(user) for user in time_per_user])
     output_format = '{0:>%d}: {1:.%df}' % (max_length, number_of_decimal_places)
-    rank_format = '{0:>%d}: ' % (len(str(len(users))))
+    rank_format = '{0:>%d}: ' % (len(str(len(time_per_user))))
 
     # Print it
 
     print()
 
-    if (sorting == "alpha"):
-        user_list = sorted(users.keys())
+    if sorting == "alpha":
+        user_list = sorted(time_per_user.keys())
 
     else:  ## if (sorting == "hours"):
-        user_list = sorted(users, key=users.get)
+        user_list = sorted(time_per_user, key=time_per_user.get)
 
     if reverse_order:
         user_list.reverse()
@@ -157,9 +148,9 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
     i = 0
     for user in user_list:
         i += 1
-        if (rank):
+        if rank:
             print(rank_format.format(i), end='')
-        print(output_format.format(user, users[user]))
+        print(output_format.format(user, time_per_user[user]))
 
 
 def main(args):
@@ -185,7 +176,7 @@ def main(args):
 
                 if arg[0] == 'd':
                     decimal_places_str = arg[1:]
-                    if (decimal_places_str.isdigit()):
+                    if decimal_places_str.isdigit():
                         number_of_decimal_places = int(decimal_places_str)
 
                 if arg == 'f':
