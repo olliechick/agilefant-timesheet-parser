@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-from __future__ import print_function
-
 import re
 import sys
 from os.path import join, dirname, abspath
@@ -42,6 +40,16 @@ def get_first_sheet(filename):
 def strip_if_string(x): return x.strip() if isinstance(x, str) else x
 
 
+def comment_to_words(comment):
+    return re.split("[ .:\[]", comment)
+
+
+def has_only_tags(comment):
+    """Returns True if the comment has only tags (or is empty)."""
+    comment = comment.strip()
+    return not (len(comment) > 0 and comment[0] != '#')
+
+
 def get_commit_hashes(string):
     if '#commits[' in string:
         trimmed_string = string[string.find('#commits') + len('#commits['):]
@@ -64,19 +72,27 @@ def process_entry(entry, users, existing_comments, use_first_name, display_all_t
     users[user] += float(spent_effort)
 
     if display_all_tags:
-        print(user + ": " + comment)
+        print(user + " [" + story + "]: " + comment)
 
     if display_tag_errors:
-        words = re.split(" |\.|:|\[", comment)
+        words = comment_to_words(comment)
         tags = set()
         for word in words:
             if len(word) > 0 and word[0] == "#":
                 tags.add(word[1:].lower())
         if story != '':
-            if not (valid_tags.intersection(tags) and commitless_tags.intersection(tags)):
-                print(user + ": [No valid tags, and not a task without story] " + comment)
-
+            if comment == '':
+                print(user + ": [error: empty comment] (story = " + story + ")")
             else:
+                if not (valid_tags.intersection(tags)):
+                    print(user + ": [error: missing tags] " + comment)
+
+                elif not (commitless_tags.intersection(tags)):
+                    print(user + ": [warning: no #commits tag] " + comment)
+
+                if has_only_tags(comment):
+                    print(user + ": [error: comment with only tags] " + comment)
+
                 for old_user, old_comment in existing_comments:
                     if old_comment == comment and 'pair' not in tags:
                         if old_user == user:
@@ -90,6 +106,16 @@ def process_entry(entry, users, existing_comments, use_first_name, display_all_t
                 print(user + ': [warning: commit SHA len] ' + comment)
                 break
     return user, comment
+
+
+def get_headers(xl_sheet):
+    headers = xl_sheet.row_values(0)
+    if not set(headers).issuperset(required_columns):
+        print("The input file does not contain all the required columns, expected: ", required_columns)
+        print("Missing: ", required_columns.difference(headers))
+        print("Got: ", headers)
+        exit(1)
+    return headers
 
 
 def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decimal_places=1,
@@ -113,13 +139,9 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
     # Generate hours-worked data
 
     processed_results = set()
+    paired_results = dict()
 
-    headers = xl_sheet.row_values(0)
-    if not set(headers).issuperset(required_columns):
-        print("The input file does not contain all the required columns, expected: ", required_columns)
-        print("Missing: ", required_columns.difference(headers))
-        print("Got: ", headers)
-        exit(1)
+    headers = get_headers(xl_sheet)
 
     # For each row (except header row):
     for row_i in range(1, xl_sheet.nrows):
@@ -128,6 +150,20 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
         result = process_entry(entry, time_per_user, processed_results,
                                use_first_name, display_all_tags, display_tag_errors)
         processed_results.add(result)
+
+        user = result[0]
+        comment = result[1]
+        date = str(xlrd.xldate_as_tuple(entry["Date"], 0))
+        if '#pair' in comment:
+            if comment in paired_results:
+                paired_results.pop(comment)
+            else:
+                paired_results[comment] = user + " (date = " + date + ")"
+
+    if display_tag_errors:
+        for comment in paired_results:
+            user = paired_results[comment]
+            print("{}: [warning: singleton #pair] {}".format(user, comment))
 
     max_length = max([len(user) for user in time_per_user])
     output_format = '{0:>%d}: {1:.%df}' % (max_length, number_of_decimal_places)
