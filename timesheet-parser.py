@@ -158,11 +158,11 @@ def print_hours(xl_sheet, use_first_name=False, sorting="hours", number_of_decim
             if comment in paired_results:
                 paired_results.pop(comment)
             else:
-                paired_results[comment] = user + " (date = " + date + ")"
+                paired_results[comment] = (user, date)
 
     if display_tag_errors:
         for comment in paired_results:
-            user = paired_results[comment]
+            user = paired_results[comment][0]
             print("{}: [warning: singleton #pair] {}".format(user, comment))
 
     max_length = max([len(user) for user in time_per_user])
