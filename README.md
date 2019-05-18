@@ -24,6 +24,20 @@ Argument |What it does
 `t`      |Print all invalid log comments (for University of Canterbury course SENG302)
 `ta`     |Print all log comments
 
+#### When invalid log comments occur
+
+Name | When it occurs
+-|-
+`error: missing tags` | A log doesn't have any of the seven tags (`implement`, `document`, `test`, `testmanual`, `fix`, `chore`, `refactor`)
+`error: empty comment` | A log have an empty comment
+`warning: no #commits tag` | A log has `implement`, `test`, `fix`,  or `refactor` without a `commits` tag
+`warning: commit SHA len` | A `commits` tag has a commit SHA with a length that is not 7, 8, or 40
+`warning: untagged pair` | There are two logs by different people with the same comment but no `pair` tag
+`warning: duplicate` | There are two logs by the same person with the same comment
+`warning: singleton #pair` | There is a log with a `pair` tag that doesn't have a matching comment with another log
+
+ 
+
 ## What it does
 It prints a list of users and how many hours they have logged.
 
