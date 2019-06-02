@@ -29,7 +29,7 @@ Argument |What it does
 Name | When it occurs
 -|-
 `error: missing tags` | A log doesn't have any of the seven tags (`implement`, `document`, `test`, `testmanual`, `fix`, `chore`, `refactor`)
-`error: empty comment` | A log have an empty comment
+`error: empty comment` | A log has  an empty comment
 `warning: no #commits tag` | A log has `implement`, `test`, `fix`,  or `refactor` without a `commits` tag
 `warning: commit SHA len` | A `commits` tag has a commit SHA with a length that is not 7, 8, or 40
 `warning: untagged pair` | There are two logs by different people with the same comment but no `pair` tag
